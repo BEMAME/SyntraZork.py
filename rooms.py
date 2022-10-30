@@ -6,7 +6,8 @@ roomCoorD = {(0,0,0):"Lobby", #a dictionary with all the rooms in the game
              (0,1,0):"Stairs0", #this is used to determine which room the player is in based on the
              (0,1,1):"Stairs1", #coordinates
              (0,1,2):"Stairs2",
-             (0,1,3):"Stairs3"}
+             (0,1,3):"Stairs3",
+             (0,-1,0):"Outside"}
 
 def list2tuple(x):
     return tuple(x)
@@ -116,3 +117,12 @@ Stairs3=Stairs(
     goL = ["w","d"]
 )
 
+Outside = Room(
+    roomName="Outside",
+    shortT="You exit the building.",
+    longT=" You breathe in the fresh air.\n"
+          " To your north is the Syntra building.\n"
+          " You contemplate if you should 'go home'.",
+    lookL=[],
+    goL=["n", "go home"]
+)
