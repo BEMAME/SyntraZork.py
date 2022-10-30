@@ -47,23 +47,17 @@ class Stairs(Room):
         super().__init__(*args,**kwargs)
 
     def climbStairsExhaustion(self): #If you climb to many stairs, you will become tired
-        global nStairsClimbed
-        try:
-            nStairsClimbed
-        except:
-            nStairsClimbed = 0
-        nStairsClimbed+=1
-        if nStairsClimbed == 2:
+        Player.nStairsClimbed+=1
+
+        if Player.nStairsClimbed == 3:
             print("You are starting to feel winded from walking up the stairs.")
             Player.changeScore(-1)
-        if nStairsClimbed == 3:
+        if Player.nStairsClimbed == 4:
             print("Climbing the stairs is starting to make you sweat.")
+            Player.changeScore(-2)
+        if Player.nStairsClimbed > 4:
+            print(f"You've climbed {Player.nStairsClimbed} stairs... Your programmer's muscles ache.")
             Player.changeScore(-5)
-        if nStairsClimbed > 3:
-            print(f"You've climbed {nStairsClimbed} stairs... Your programmer's muscles ache.")
-            Player.changeScore(-10)
-
-
 
 Lobby=Room(
     roomName = "Lobby",

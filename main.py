@@ -39,7 +39,7 @@ class GameC:
                 currentRoom.climbStairsExhaustion()
             if inp.lower() == "d":
                 coor[2] = coor[2]-1
-            if inp.lower() == "go home": #this can only be selected if you are Outside
+            if inp.lower() == "go home": #this can only be selected from the "Outside" room
                 Game.endGame()
             return True, currentRoom.enterRoom()
         else:
@@ -59,6 +59,17 @@ class GameC:
             Player.prtScore()
             return True
 
+        if inp.lower() in ["get points", "take points", "increase score",
+                           "grab points", "cheat", "cheatcode", "cheat code"]: #an easter egg
+            if Player.cheated == False:
+                print("You grab some points.")
+                Player.changeScore(5)
+                Player.cheated = True
+            else:
+                print("Hey! Don't get greedy now!")
+                Player.changeScore(-1)
+            return True
+
     def lookInp(self): #looking around the room. Return true/false is for checking if valid input given
         lookSyn = ["look", "l", "info", "room", roomFromCoor(coor)]
 
@@ -70,6 +81,7 @@ class GameC:
 
     def invalidAction(self): #this is called when player inputs nonsense
         print("I don't understand what you want to do.")
+
 
     def endGame(self):
         if Player.score < 0: #horrible ending
@@ -103,7 +115,7 @@ while True:
 
     if inp.lower() in ["q","quit"]: break #quit the game
 
-    #this block checks what input was given and perform the action
+    #this block checks what input was given and performs the action
     validAction = []
     walkValidInp, currentRoom = Game.walkInp()
     validAction.append(walkValidInp)
