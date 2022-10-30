@@ -4,6 +4,8 @@ print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 from rooms import *
 
+
+
 def helpMenu():
     print("n to go North\n"
           "e to go East\n"
