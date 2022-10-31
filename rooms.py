@@ -1,5 +1,5 @@
 import sys
-from people import *
+from entities import *
 
 coor = [0,0,0] #coordinates x,y,z
 roomCoorD = {(0,0,0):"Lobby", #a dictionary with all the rooms in the game
@@ -30,13 +30,13 @@ class Room:
         self.lookL = lookL
         self.exitsL = exitsL
 
-    def inRoomCheck(self,ele,rList):
+    def checkIfPresent(self,ele,rList):
         return True if ele in rList else False
 
-    def lookRoom(self):
+    def look(self):
         print(self.longT)
 
-    def enterRoom(self): #enters the new room, prints the new room's name and looks around
+    def enter(self): #enters the new room, prints the new room's name and looks around
         currentRoom = roomFromCoor(coor)
         print(currentRoom.shortT)
         print(currentRoom.longT)
@@ -67,7 +67,7 @@ Lobby=Room(
            ">To the north is an ascending staircase to the first floor.\n"
            ">To the south is the exit of the building.\n"
            ">There is a bar to your west.",
-    lookL = ["reception","bar","display"],
+    lookL = ["reception","bar","exit","display"],
     exitsL = ["n","s","w"]
 )
 

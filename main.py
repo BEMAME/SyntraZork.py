@@ -18,14 +18,20 @@ class GameC:
               "[u] to go Up\n"
               "[d] to go Down\n"
               "[look] to look around the room\n"
+              "[look <object>] to look at an object. This command should always be two words; e.g. 'look table'.\n"
+              "[i] to show a list of items that are in your backpack."
               "[score] to display your current score\n"
-              "[q] to quit\n")
+              "[q] to quit")
 
     def walkInp(self): #Returns new room if valid direction input.
                     # return true/false is for checking if valid input given
-        if inp not in ["n", "e", "s", "w", "u", "d", "go home"]:
+        if len(inp.split()) > 1 and inp.lower() != "go home":
             return False, currentRoom
-        if currentRoom.inRoomCheck(inp,currentRoom.exitsL):
+
+        if inp.lower() not in ["n", "e", "s", "w", "u", "d", "go home"]:
+            return False, currentRoom
+
+        if currentRoom.checkIfPresent(inp,currentRoom.exitsL):
             if inp.lower() == "n":
                 coor[1] = coor[1]+1
             if inp.lower() == "e":
@@ -41,7 +47,7 @@ class GameC:
                 coor[2] = coor[2]-1
             if inp.lower() == "go home": #this can only be selected from the "Outside" room
                 Game.endGame()
-            return True, currentRoom.enterRoom()
+            return True, currentRoom.enter()
         else:
             print(f"You cannot go that way.")
             return True,currentRoom
@@ -59,6 +65,10 @@ class GameC:
             Player.prtScore()
             return True
 
+        if inp.lower() in ["i","inv","inventory","backpack"]:
+            Player.inventory()
+            return True
+
         if inp.lower() in ["get points", "take points", "increase score",
                            "grab points", "cheat", "cheatcode", "cheat code"]: #an easter egg
             if Player.cheated == False:
@@ -70,17 +80,26 @@ class GameC:
                 Player.changeScore(-1)
             return True
 
-    def lookInp(self): #looking around the room. Return true/false is for checking if valid input given
-        lookSyn = ["look"]
-
-        if inp.lower() in lookSyn:
-            currentRoom.lookRoom(),
-            return True
-        else:
+    def lookInp(self): #looking around the room. Return true/false is for c hecking if valid input given
+        if inp.lower().startswith("look") is False: #player did not type something that started with "look..."
             return False
 
+#todo: How to introduce synonyms, so that both "reception" and "receptionist" yield the same result?
+
+        if len(inp.split()) == 1: #player just typed "look", nothing more
+            currentRoom.look()
+        elif len(inp.split()) == 2: #player typed "look <something>"
+            if inp.split()[1] in currentRoom.lookL or inp.split()[1] in Player.inv: #in the valid list of things to look at
+                str_to_class(inp.split()[1]).look()
+            else: #player wanted to look at something that doesn't exist
+                print("I don't know how to look at that.")
+        else: #player typed more than 2 words, syntax incorrect
+            print("You typed too many words. To look at something, type 'look <object>', e.g. 'look table'")
+
+        return True
+
     def invalidAction(self): #this is called when player inputs nonsense
-        print("I don't understand what you want to do.")
+        print("I don't understand what you want to do. Type [help] for a list of basic commands.")
 
     def endGame(self):
         if Player.score < 0: #horrible ending
@@ -107,7 +126,7 @@ while True:
     if Game.gameStart == True:    #setting up the very first room at the start of the game...
         print("------------------------------------------------------------------------------------------------------")
         currentRoom = roomFromCoor(coor)
-        currentRoom.enterRoom()
+        currentRoom.enter()
     Game.gameStart = False
     inp = input("------------------------------------------------------------------------------------------------------"
             "\nWhat do you do? ___")
