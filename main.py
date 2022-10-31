@@ -11,21 +11,21 @@ class GameC:
         self.gameStart = gameStart
 
     def helpMenu(self):
-        print("n to go North\n"
-              "e to go East\n"
-              "s to go South\n"
-              "w to go West\n"
-              "u to go Up\n"
-              "d to go Down\n"
-              "look to look around the room\n"
-              "score to display your current score\n"
-              "q to quit\n")
+        print("[n] to go North\n"
+              "[e] to go East\n"
+              "[s] to go South\n"
+              "[w] to go West\n"
+              "[u] to go Up\n"
+              "[d] to go Down\n"
+              "[look] to look around the room\n"
+              "[score] to display your current score\n"
+              "[q] to quit\n")
 
     def walkInp(self): #Returns new room if valid direction input.
                     # return true/false is for checking if valid input given
         if inp not in ["n", "e", "s", "w", "u", "d", "go home"]:
             return False, currentRoom
-        if currentRoom.inRoomCheck(inp,currentRoom.goL):
+        if currentRoom.inRoomCheck(inp,currentRoom.exitsL):
             if inp.lower() == "n":
                 coor[1] = coor[1]+1
             if inp.lower() == "e":
@@ -51,7 +51,7 @@ class GameC:
             Game.helpMenu()
             return True
 
-        if inp.lower() in ["coor","where","room","location"]:
+        if inp.lower() in ["coor","where","location"]:
             print(f"{currentRoom.shortT} Your current coordinates are {coor}.")
             return True
 
@@ -71,7 +71,7 @@ class GameC:
             return True
 
     def lookInp(self): #looking around the room. Return true/false is for checking if valid input given
-        lookSyn = ["look", "l", "info", "room", roomFromCoor(coor)]
+        lookSyn = ["look"]
 
         if inp.lower() in lookSyn:
             currentRoom.lookRoom(),
@@ -81,7 +81,6 @@ class GameC:
 
     def invalidAction(self): #this is called when player inputs nonsense
         print("I don't understand what you want to do.")
-
 
     def endGame(self):
         if Player.score < 0: #horrible ending

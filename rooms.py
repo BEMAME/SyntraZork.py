@@ -23,12 +23,12 @@ def roomFromCoor(coor):
     return currentRoom
 
 class Room:
-    def __init__(self,roomName,shortT,longT,lookL,goL):
+    def __init__(self,roomName,shortT,longT,lookL,exitsL):
         self.roomName = roomName
         self.shortT = shortT
         self.longT = longT
         self.lookL = lookL
-        self.goL = goL
+        self.exitsL = exitsL
 
     def inRoomCheck(self,ele,rList):
         return True if ele in rList else False
@@ -62,61 +62,61 @@ class Stairs(Room):
 Lobby=Room(
     roomName = "Lobby",
     shortT = "You are in the lobby.",
-    longT = " To your right is the reception desk.\n"
-           " A large display is hanging up high.\n"
-           " To the north is an ascending staircase to the first floor.\n"
-           " To the south is the exit of the building.\n"
-           " There is a bar to your west.",
+    longT = ">To your right is the reception desk.\n"
+           ">A large display is hanging up high.\n"
+           ">To the north is an ascending staircase to the first floor.\n"
+           ">To the south is the exit of the building.\n"
+           ">There is a bar to your west.",
     lookL = ["reception","bar","display"],
-    goL = ["n","s","w"]
+    exitsL = ["n","s","w"]
 )
 
 Stairs0=Stairs(
     roomName = "Stairs0",
     shortT = "You are in the stairwell on the ground floor.",
-    longT = " To your south is the Lobby.\n"
-            " The classrooms are upstairs.",
+    longT = ">To your south is the Lobby.\n"
+            ">The classrooms are upstairs.",
     lookL = [],
-    goL = ["s","u"]
+    exitsL = ["s","u"]
 )
 
 Stairs1=Stairs(
     roomName = "Stairs1",
     shortT = "You are near the stairs on the first floor.",
-    longT = " The hallway to your east leads to the toilets.\n"
-            " The hallway to your west has multiple classrooms.\n"
-            " There are more classrooms upstairs.\n"
-            " If you head down you will be in the ground floor stairwell which leads into the lobby.",
+    longT = ">The hallway to your east leads to the toilets.\n"
+            ">The hallway to your west has multiple classrooms.\n"
+            ">There are more classrooms upstairs.\n"
+            ">If you head down you will be in the ground floor stairwell which leads into the lobby.",
     lookL = [],
-    goL = ["e","w","u","d"]
+    exitsL = ["e","w","u","d"]
 )
 
 Stairs2=Stairs(
     roomName = "Stairs2",
     shortT = "You are near the stairs on the second floor.",
-    longT = " The hallway to your west has multiple classrooms.\n"
-            " There are more classrooms upstairs.\n"
-            " You can take the steps back down to the first floor.",
+    longT = ">The hallway to your west has multiple classrooms.\n"
+            ">There are more classrooms upstairs.\n"
+            ">You can take the steps back down to the first floor.",
     lookL = [],
-    goL = ["w","u","d"]
+    exitsL = ["w","u","d"]
 )
 
 Stairs3=Stairs(
     roomName = "Stairs3",
     shortT = "You are near the stairs on the third floor.",
-    longT = " This is the top floor.\n"
-            " The hallway to your west has multiple classrooms.\n"
-            " You can take the steps back down to the second floor.",
+    longT = ">This is the top floor.\n"
+            ">The hallway to your west has multiple classrooms.\n"
+            ">You can take the steps back down to the second floor.",
     lookL = [],
-    goL = ["w","d"]
+    exitsL = ["w","d"]
 )
 
 Outside = Room(
     roomName="Outside",
     shortT="You exit the building.",
-    longT=" You breathe in the fresh air.\n"
-          " To your north is the Syntra building.\n"
-          " You contemplate if you should 'go home'.",
+    longT=">You breathe in the fresh air.\n"
+          ">To your north is the Syntra building.\n"
+          ">You contemplate if you should 'go home'.",
     lookL=[],
-    goL=["n", "go home"]
+    exitsL=["n", "go home"]
 )
