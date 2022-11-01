@@ -1,7 +1,11 @@
+entitySyn={} # dict with synonyms for all entities, is populated by entity init
+
 class Entity:
-    def __init__(self,name,lookT):
+    def __init__(self, name, lookT, synonyms=[]):
         self.name = name
         self.lookT = lookT
+        self.synonyms = synonyms
+        entitySyn[self.name] = self.synonyms #this puts the synonyms of each entity into the entitySyn dict
 
     def look(self):
         print(self.lookT)
@@ -12,9 +16,10 @@ class Thing(Entity):
         self.pickup = pickup
 
 class Person(Entity):
-    def __init__(self,helloT,*args,**kwargs):
+    def __init__(self,helloT,pName,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.helloT = helloT
+        self.pName = pName
 
     def hello(self):
         print(self.helloT)
@@ -46,12 +51,13 @@ class Protagonist:
 
 Player = Protagonist()
 
-reception = Person(
-    name="Sasha",
+receptionist = Person(
+    name="receptionist",
+    pName="Sasha",
     lookT="The receptionist is working on her computer. She is very focused.",
-    helloT="With a start, the receptionist looks up at you. 'Oh, good evening. Anything you wanted to [ask]?'"
-
-    #def ask() TODO
+    helloT="With a start, the receptionist looks up at you. 'Oh, good evening. Anything you wanted to [ask]?'",
+    synonyms=["reception","desk","sasha"]
+    #def ask() #TODO
 )
 
 pen = Thing(name = "pen",

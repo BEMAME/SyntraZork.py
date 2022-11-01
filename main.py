@@ -6,9 +6,17 @@ from rooms import *
 
 class GameC:
     gameOver = False
+    lookAt = ""
 
     def __init__(self,gameStart=True):
         self.gameStart = gameStart
+
+    def synonymCheck(self,inputVal): #TODO check if this works
+        try:
+            x = [target for target, syn in entitySyn.items() if inputVal in syn][0]
+            return x #this returns the key of the entitySyn dictionary
+        except:
+            print("not found")
 
     def helpMenu(self):
         print("[n] to go North\n"
@@ -84,15 +92,20 @@ class GameC:
         if inp.lower().startswith("look") is False: #player did not type something that started with "look..."
             return False
 
-#todo: How to introduce synonyms, so that both "reception" and "receptionist" yield the same result?
-
         if len(inp.split()) == 1: #player just typed "look", nothing more
             currentRoom.look()
+
         elif len(inp.split()) == 2: #player typed "look <something>"
-            if inp.split()[1] in currentRoom.lookL or inp.split()[1] in Player.inv: #in the valid list of things to look at
-                str_to_class(inp.split()[1]).look()
+            self.lookAt = inp.split()[1].lower()
+            print(f"self.lookAt = {self.lookAt}, type = {type(self.lookAt)}")
+            x = self.synonymCheck(self.lookAt)
+
+            if x in currentRoom.lookL or self.lookAt in Player.inv: #in the valid list of things to look at
+                str_to_class(x).look()
+
             else: #player wanted to look at something that doesn't exist
                 print("I don't know how to look at that.")
+
         else: #player typed more than 2 words, syntax incorrect
             print("You typed too many words. To look at something, type 'look <object>', e.g. 'look table'")
 

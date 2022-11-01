@@ -23,12 +23,13 @@ def roomFromCoor(coor):
     return currentRoom
 
 class Room:
-    def __init__(self,roomName,shortT,longT,lookL,exitsL):
-        self.roomName = roomName
+    def __init__(self,name,shortT,longT,lookL,exitsL,syn=[]):
+        self.name = name
         self.shortT = shortT
         self.longT = longT
         self.lookL = lookL
         self.exitsL = exitsL
+        self.syn = syn
 
     def checkIfPresent(self,ele,rList):
         return True if ele in rList else False
@@ -60,19 +61,19 @@ class Stairs(Room):
             Player.changeScore(-5)
 
 Lobby=Room(
-    roomName = "Lobby",
+    name = "Lobby",
     shortT = "You are in the lobby.",
     longT = ">To your right is the reception desk.\n"
            ">A large display is hanging up high.\n"
            ">To the north is an ascending staircase to the first floor.\n"
            ">To the south is the exit of the building.\n"
            ">There is a bar to your west.",
-    lookL = ["reception","bar","exit","display"],
+    lookL = ["receptionist","bar","exit","display"],
     exitsL = ["n","s","w"]
 )
 
 Stairs0=Stairs(
-    roomName = "Stairs0",
+    name = "Stairs0",
     shortT = "You are in the stairwell on the ground floor.",
     longT = ">To your south is the Lobby.\n"
             ">The classrooms are upstairs.",
@@ -81,7 +82,7 @@ Stairs0=Stairs(
 )
 
 Stairs1=Stairs(
-    roomName = "Stairs1",
+    name = "Stairs1",
     shortT = "You are near the stairs on the first floor.",
     longT = ">The hallway to your east leads to the toilets.\n"
             ">The hallway to your west has multiple classrooms.\n"
@@ -92,7 +93,7 @@ Stairs1=Stairs(
 )
 
 Stairs2=Stairs(
-    roomName = "Stairs2",
+    name = "Stairs2",
     shortT = "You are near the stairs on the second floor.",
     longT = ">The hallway to your west has multiple classrooms.\n"
             ">There are more classrooms upstairs.\n"
@@ -102,7 +103,7 @@ Stairs2=Stairs(
 )
 
 Stairs3=Stairs(
-    roomName = "Stairs3",
+    name = "Stairs3",
     shortT = "You are near the stairs on the third floor.",
     longT = ">This is the top floor.\n"
             ">The hallway to your west has multiple classrooms.\n"
@@ -112,7 +113,7 @@ Stairs3=Stairs(
 )
 
 Outside = Room(
-    roomName="Outside",
+    name="Outside",
     shortT="You exit the building.",
     longT=">You breathe in the fresh air.\n"
           ">To your north is the Syntra building.\n"
