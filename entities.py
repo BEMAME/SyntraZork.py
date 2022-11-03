@@ -56,7 +56,7 @@ receptionist = Person(
     pName="Sasha",
     lookT="The receptionist is working on her computer. She is very focused.",
     helloT="With a start, the receptionist looks up at you. 'Oh, good evening. Anything you wanted to [ask]?'",
-    synonyms=["reception","desk","sasha"]
+    synonyms=["receptionist","reception","desk","sasha"]#todo autopopulate synonyms with name
     #def ask() #TODO
 )
 
