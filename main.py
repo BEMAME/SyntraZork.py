@@ -7,16 +7,17 @@ from rooms import *
 class GameC:
     gameOver = False
     lookAt = ""
+    askPerson = ""
 
     def __init__(self,gameStart=True):
         self.gameStart = gameStart
 
-    def synonymCheck(self,inputVal): #TODO check if this works
+    def synonymCheck(self,inputVal):
         try:
             x = [target for target, syn in entitySyn.items() if inputVal in syn][0]
             return x #this returns the key of the entitySyn dictionary
         except:
-            print("not found")
+            None
 
     def helpMenu(self):
         print("[n] to go North\n"
@@ -66,7 +67,7 @@ class GameC:
             return True
 
         if inp.lower() in ["coor","where","location"]:
-            print(f"{currentRoom.shortT} Your current coordinates are {coor}.")
+            print(f"{currentRoom.shortT} Your coordinates are {coor}.")
             return True
 
         if inp.lower() in ["score","points"]:
@@ -77,8 +78,9 @@ class GameC:
             Player.inventory()
             return True
 
+        # an easter egg
         if inp.lower() in ["get points", "take points", "increase score",
-                           "grab points", "cheat", "cheatcode", "cheat code"]: #an easter egg
+                           "grab points", "cheat", "cheatcode", "cheat code"]:
             if Player.cheated == False:
                 print("You grab some points.")
                 Player.changeScore(5)
@@ -88,35 +90,59 @@ class GameC:
                 Player.changeScore(-1)
             return True
 
-    def lookInp(self): #looking around the room. Return true/false is for c hecking if valid input given
-        if inp.lower().startswith("look") is False: #player did not type something that started with "look..."
+    # looking around the room. Return true/false is for checking if valid input given
+    def lookInp(self):
+        # player did not type something that started with "look..."
+        if inp.lower().startswith("look") is False:
             return False
 
-        if len(inp.split()) == 1: #player just typed "look", nothing more
+        # player typed "look" or "look room" ==> give description of room
+        if len(inp.split()) == 1 or inp.lower() == "look room":
             currentRoom.look()
 
-        elif len(inp.split()) == 2: #player typed "look <something>"
+        # player typed "look <something>"
+        elif len(inp.split()) == 2:
             self.lookAt = inp.split()[1].lower()
-            print(f"self.lookAt = {self.lookAt}, type = {type(self.lookAt)}")
             x = self.synonymCheck(self.lookAt)
-
-            if x in currentRoom.lookL or self.lookAt in Player.inv: #in the valid list of things to look at
+            if x in currentRoom.lookL or self.lookAt in Player.inv:
                 str_to_class(x).look()
 
-            else: #player wanted to look at something that doesn't exist
+            else:
                 print("I don't know how to look at that.")
 
-        else: #player typed more than 2 words, syntax incorrect
+        # player typed more than 2 words, syntax incorrect
+        else:
             print("You typed too many words. To look at something, type 'look <object>', e.g. 'look table'")
 
         return True
 
-    def invalidAction(self): #this is called when player inputs nonsense
+    def askInp(self):
+        # player did not type something that started with "ask..."
+        if inp.lower().startswith("ask") is False:
+            return False
+
+        if len(inp.split()) == 1:
+            print("Who are you going to ask?")
+
+        elif len(inp.split()) == 2:
+            self.askPerson = inp.split()[1].lower()
+            x = self.synonymCheck(self.askPerson)
+            if x in currentRoom.askL:
+                str_to_class(x).ask()
+            else:
+                print(f"{x.capitalize()} isn't feeling very talkative.")
+
+        else:
+            print("You typed too many words. To ask someone a question, type 'ask <person>', e.g. 'ask receptionist'")
+
+        return True
+
+    def invalidAction(self):
         print("I don't understand what you want to do. Type [help] for a list of basic commands.")
 
     def endGame(self):
         if Player.score < 0: #horrible ending
-            print(f"You cannot bear this any longer. You make a bolt for your bicycle and ride off as fast as you can.\n"
+            print(f"You cannot bear this any longer. You run towards your bicycle and ride off as fast as you can.\n"
                   f"When you look behind you, you see the Syntra building disappear behind the horizon.\n"
                   f"You swear never to return again.")
         if 0 >= Player.score <= 10: #bad ending
@@ -136,13 +162,18 @@ class GameC:
 Game = GameC()
 
 while True:
-    if Game.gameStart == True:    #setting up the very first room at the start of the game...
+    # setting up the very first room at the start of the game...
+    if Game.gameStart == True:
         print("------------------------------------------------------------------------------------------------------")
         currentRoom = roomFromCoor(coor)
-        currentRoom.enter()
+        print("A few weeks ago, you registered for the Syntra 'Python for Beginners' class.\n"
+              "Full of excitement you enter the Syntra lobby. Classes start in 5 minutes.\n"
+              "You should [look] around to find out where to go.")
+        #currentRoom.enter()
     Game.gameStart = False
     inp = input("------------------------------------------------------------------------------------------------------"
             "\nWhat do you do? ___")
+    #
 
     if inp.lower() in ["q","quit"]: break #quit the game
 
@@ -150,6 +181,7 @@ while True:
     validAction = []
     walkValidInp, currentRoom = Game.walkInp()
     validAction.append(walkValidInp)
-    validAction.append(Game.optionsInp())
     validAction.append(Game.lookInp())
+    validAction.append(Game.askInp())
+    validAction.append(Game.optionsInp())
     if True not in validAction: Game.invalidAction()
