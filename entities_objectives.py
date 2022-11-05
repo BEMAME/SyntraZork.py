@@ -100,6 +100,12 @@ findClassRoom = Objective(
     score=1,
 )
 
+getPen = Objective(
+    completeT='"You can keep that if you want.", says the receptionist.\n'
+              '> You have a pen!',
+    score=1
+)
+
 manyStairsClimbed = Objective(
     completeT="> You getting tired from walking up all these the stairs...",
     score=-1,
@@ -121,7 +127,7 @@ receptionist = Person(
 
 
 pen = Thing(name = "pen",
-            lookT = "This old pen has been in your backpack for a very long time.",
+            lookT = "A Synta-branded pen you got from the reception desk.",
             pickup = True,
             synonyms = [])
 

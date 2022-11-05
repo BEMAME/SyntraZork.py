@@ -24,13 +24,13 @@ def roomFromCoor(coor):
     return currentRoom
 
 class Room:
-    def __init__(self,name,shortT,longT,lookL,exitsL,askL=[],itemL=[],syn=[]):
+    def __init__(self,name,shortT,longT,lookL,exitsL,askL=[],itemD={},syn=[]):
         self.name = name
         self.shortT = shortT
         self.longT = longT
         self.lookL = lookL
         self.askL = askL
-        self.itemL = itemL
+        self.itemD = itemD
         self.exitsL = exitsL
         self.syn = syn
 
@@ -39,6 +39,9 @@ class Room:
 
     def look(self):
         print(self.longT)
+        if self.itemD:
+            [print(values) for values in self.itemD.values()] #if there are pick-uppable
+                                                # items in the room a description will be given here
 
     def enter(self): #enters the new room, prints the new room's name and looks around
         currentRoom = roomFromCoor(coor)
@@ -65,7 +68,7 @@ Lobby=Room(
            "There is a bar to your west.",
     lookL = ["receptionist","bar","exit","display"],
     askL = ["receptionist"],
-    itemL = ["pen"],
+    itemD = {"pen":"A Syntra-branded pen is laying on the reception desk."},
     exitsL = ["n","s","w"]
 )
 

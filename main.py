@@ -141,8 +141,15 @@ class GameC:
             print(f"What do you want to {inp.split()[0].lower()}?")
             return True
 
+        if inp.split()[1].lower() in currentRoom.itemD:
+            currentRoom.itemD.pop(inp.split()[1].lower()) #remove the item from room
+            Player.inv.add(inp.split()[1].lower()) #put item in inventory
+            print(f"You put the {inp.split()[1].lower()} in your backpack.")
+            if inp.split()[1].lower() == "pen":
+                getPen.complete()
+
         # easter egg objective
-        if inp.split()[1].lower() in ["points"] and inp.lower() != "use points":
+        if inp.split()[1].lower() == "points" and inp.lower() != "use points":
             getPoints.complete()
 
         return True
