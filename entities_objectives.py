@@ -190,5 +190,5 @@ bar = Entity(name="bar",
              synonyms=["café", "cafe", "pub"])
 
 exit = Entity(name="exit",
-              lookT="This is the way you came in.",
-              synonyms = [])
+              lookT="The entrance to the building. You came in this way.",
+              synonyms=[])
