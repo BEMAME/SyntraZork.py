@@ -8,7 +8,8 @@ roomCoorD = {(0,0,0):"Lobby", #a dictionary with all the rooms in the game
              (0,1,1):"Stairs1", #coordinates
              (0,1,2):"Stairs2",
              (0,1,3):"Stairs3",
-             (0,-1,0):"Outside"}
+             (0,-1,0):"Outside",
+             (-1,0,0):"Bar"}
 
 def list2tuple(x):
     return tuple(x)
@@ -24,7 +25,7 @@ def roomFromCoor(coor):
     return currentRoom
 
 class Room:
-    def __init__(self,name,shortT,longT,lookL,exitsL,askL=[],itemD={},syn=[]):
+    def __init__(self,name,shortT,longT,lookL,exitsL,askL=[],itemD={}):
         self.name = name
         self.shortT = shortT
         self.longT = longT
@@ -32,7 +33,6 @@ class Room:
         self.askL = askL
         self.itemD = itemD
         self.exitsL = exitsL
-        self.syn = syn
 
     def checkIfPresent(self,ele,rList):
         return True if ele in rList else False
@@ -40,8 +40,7 @@ class Room:
     def look(self):
         print(self.longT)
         if self.itemD:
-            [print(values) for values in self.itemD.values()] #if there are pick-uppable
-                                                # items in the room a description will be given here
+            [print(values) for values in self.itemD.values()] #if there are valid items, will print description
 
     def enter(self): #enters the new room, prints the new room's name and looks around
         currentRoom = roomFromCoor(coor)
@@ -120,4 +119,16 @@ Outside = Room(
           "You contemplate if you should [go home]'.",
     lookL=[],
     exitsL=["n", "go home"]
+)
+
+Bar = Room(
+    name="Bar",
+    shortT="You are in a mostly empty bar.",
+    longT="This is quite a spatious area. Its size accentuates its emptiness.\n"
+          "A staff member is washing up behind the counter.",
+    lookL=["barista"],
+    askL=["barista"],
+    exitsL=["e"],
+    itemD={"coffee": "There's a massive espresso machine in the back.",
+           "beer": "A variety of beers are on display."}
 )
