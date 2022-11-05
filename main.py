@@ -27,7 +27,8 @@ class GameC:
               "[u] to go Up\n"
               "[d] to go Down\n"
               "[look] to look around the room\n"
-              "[look <object>] to look at an object. This command should always be two words; e.g. 'look table'.\n"
+              "[talk <person>] to start a conversation\n"
+              "[look <object>] to look at an object.\n"
               "[i] to show a list of items that are in your backpack."
               "[score] to display your current score\n"
               "[q] to quit")
@@ -61,7 +62,20 @@ class GameC:
             print(f"You cannot go that way.")
             return True,currentRoom
 
+    def checkInputLen(self): #is called when player enters 3 words or more - this is not allowed
+        if len(inp.split()) > 2:
+            print("You entered too many words. To interact with something or someone type '<action> <object',\n"
+                  "e.g. 'ask receptionist' or 'look laptop'.")
+            return True
+
+        else:
+            return False
+
     def optionsInp(self): #various meta-options. Return true/false is for checking if valid input given
+        if inp.split()[0].lower() not in ["help","coor","where","location","score","points","i","inv",
+                                          "inventory","backpack"]:
+            return False
+
         if inp.lower() == "help":
             Game.helpMenu()
             return True
@@ -78,22 +92,9 @@ class GameC:
             Player.inventory()
             return True
 
-        # an easter egg
-        if inp.lower() in ["get points", "take points", "increase score",
-                           "grab points", "cheat", "cheatcode", "cheat code"]:
-            if Player.cheated == False:
-                print("You grab some points.")
-                Player.changeScore(5)
-                Player.cheated = True
-            else:
-                print("Hey! Don't get greedy now!")
-                Player.changeScore(-1)
-            return True
-
     # looking around the room. Return true/false is for checking if valid input given
     def lookInp(self):
-        # player did not type something that started with "look..."
-        if inp.lower().startswith("look") is False:
+        if inp.split()[0].lower() not in ["look"]:
             return False
 
         # player typed "look" or "look room" ==> give description of room
@@ -110,30 +111,39 @@ class GameC:
             else:
                 print("I don't know how to look at that.")
 
-        # player typed more than 2 words, syntax incorrect
-        else:
-            print("You typed too many words. To look at something, type 'look <object>', e.g. 'look table'")
-
         return True
 
-    def askInp(self):
-        # player did not type something that started with "ask..."
-        if inp.lower().startswith("ask") is False:
+    def talkInp(self):
+        if inp.split()[0].lower() not in ["talk","ask"]:
             return False
 
         if len(inp.split()) == 1:
-            print("Who are you going to ask?")
+            print("Who are you talking to?")
 
         elif len(inp.split()) == 2:
             self.askPerson = inp.split()[1].lower()
             x = self.synonymCheck(self.askPerson)
             if x in currentRoom.askL:
                 str_to_class(x).ask()
-            else:
+            elif x in Player.inv:
                 print(f"{x.capitalize()} isn't feeling very talkative.")
+            else:
+                return False
 
-        else:
-            print("You typed too many words. To ask someone a question, type 'ask <person>', e.g. 'ask receptionist'")
+        return True
+
+    def interactItem(self):
+
+        if inp.split()[0].lower() not in ["get","grab","take","give","use"]:
+            return False
+
+        if len(inp.split()) == 1:
+            print(f"What do you want to {inp.split()[0].lower()}?")
+            return True
+
+        # easter egg objective
+        if inp.split()[1].lower() in ["points"] and inp.lower() != "use points":
+            getPoints.complete()
 
         return True
 
@@ -177,11 +187,13 @@ while True:
 
     if inp.lower() in ["q","quit"]: break #quit the game
 
-    #this block checks what input was given and performs the action
+    #checks what input was given and performs the action
     validAction = []
     walkValidInp, currentRoom = Game.walkInp()
     validAction.append(walkValidInp)
+    validAction.append(Game.checkInputLen())
     validAction.append(Game.lookInp())
-    validAction.append(Game.askInp())
+    validAction.append(Game.talkInp())
+    validAction.append(Game.interactItem())
     validAction.append(Game.optionsInp())
     if True not in validAction: Game.invalidAction()

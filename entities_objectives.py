@@ -10,12 +10,10 @@ class Entity:
 
     def look(self):
         print(self.lookT)
-        if self.name == "receptionist" and Player.knowsClassroomNumber is False:
+        if self.name == "receptionist" and findClassRoom.done is False: #receptionist will ask if you need help
             receptionist.hello()
-
-        if self.name == "display" and Player.knowsClassroomNumber is False:
-            Player.knowsClassroomNumber = True
-            Player.changeScore(1)
+        if self.name == "display" and findClassRoom.done is False:
+            findClassRoom.complete()
 
 class Thing(Entity):
     def __init__(self,pickup=False,useL=[],*args,**kwargs):
@@ -35,21 +33,20 @@ class Person(Entity):
 
     def ask(self):
         print(self.askT)
-        if self.name == "receptionist" and Player.knowsClassroomNumber is False:
-            Player.knowsClassroomNumber = True
-            Player.changeScore(1)
+        if self.name == "receptionist" and findClassRoom.done is False:
+            findClassRoom.complete()
 
 class Protagonist:
-    cheated = False
-    knowsClassroomNumber = False
-    nStairsClimbed = 0
-
-    def __init__(self,score=0,inv={"laptop","pen"}):
+    def __init__(self,nStairsClimbed=0,score=0,inv={"laptop"}):
+        self.nStairsClimbed = nStairsClimbed
         self.score = score
         self.inv = inv
 
     def changeScore(self,points):
         self.score = self.score + points
+
+        if points == 0:
+            return None #this is needed for repeatable Objectives in which the score for repeating the objective is 0.
 
         s = lambda x: 'point' if (abs(points) == 1) else 'points'
         if points < 0:
@@ -65,6 +62,52 @@ class Protagonist:
         print (f"Your score is {self.score}.")
 
 Player = Protagonist()
+
+class Objective:
+    def __init__(self,completeT,score,done=False,repeatable=False,repeatT="",repeatScore=0,confirmT=""):
+        self.completeT = completeT
+        self.score = score
+        self.done = done
+        self.repeatable = repeatable
+        self.repeatT = repeatT
+        self.repeatScore = repeatScore
+        self.confirmT = confirmT
+
+    def complete(self):
+        if self.done is False: #player hasn't completed the objective yet
+            self.done = True
+            print(self.completeT)
+            Player.changeScore(self.score)
+
+        elif self.done is True and self.repeatable is True: #player completes a repeatable objective again
+            print(self.repeatT)
+            Player.changeScore(self.repeatScore)
+
+        elif self.done is True and self.repeatable is False: #player completes a non-repeatable objective
+            print(self.confirmT)
+
+# an easter egg
+getPoints = Objective(
+    completeT="> You grab some points.",
+    score=3,
+    repeatable=True,
+    repeatT="> Hey! Don't get greedy now!",
+    repeatScore=-1
+)
+
+findClassRoom = Objective(
+    completeT="> You found out which classroom you should go to!",
+    score=1,
+)
+
+manyStairsClimbed = Objective(
+    completeT="> You getting tired from walking up all these the stairs...",
+    score=-1,
+    repeatable=True,
+    repeatT=f"> You've climbed {Player.nStairsClimbed} stairs today... Your programmer's muscles ache.",
+    #TODO: Ask Kian: Player.nStairsClimbed is always the initial value of 0, how to update?
+    repeatScore=-1
+)
 
 receptionist = Person(
     name="receptionist",

@@ -1,5 +1,6 @@
 import sys
-from entities import *
+from entities_objectives import *
+
 
 coor = [0,0,0] #coordinates x,y,z
 roomCoorD = {(0,0,0):"Lobby", #a dictionary with all the rooms in the game
@@ -23,12 +24,13 @@ def roomFromCoor(coor):
     return currentRoom
 
 class Room:
-    def __init__(self,name,shortT,longT,lookL,exitsL,askL=[],syn=[]):
+    def __init__(self,name,shortT,longT,lookL,exitsL,askL=[],itemL=[],syn=[]):
         self.name = name
         self.shortT = shortT
         self.longT = longT
         self.lookL = lookL
         self.askL = askL
+        self.itemL = itemL
         self.exitsL = exitsL
         self.syn = syn
 
@@ -50,16 +52,8 @@ class Stairs(Room):
 
     def climbStairsExhaustion(self): #If you climb to many stairs, you will become tired
         Player.nStairsClimbed+=1
-
-        if Player.nStairsClimbed == 3:
-            print("You are starting to feel winded from walking up the stairs.")
-            Player.changeScore(-1)
-        if Player.nStairsClimbed == 4:
-            print("Climbing the stairs is starting to make you sweat.")
-            Player.changeScore(-2)
-        if Player.nStairsClimbed > 4:
-            print(f"You've climbed {Player.nStairsClimbed} stairs... Your programmer's muscles ache.")
-            Player.changeScore(-5)
+        if Player.nStairsClimbed > 2:
+            manyStairsClimbed.complete()
 
 Lobby=Room(
     name = "Lobby",
@@ -71,6 +65,7 @@ Lobby=Room(
            "There is a bar to your west.",
     lookL = ["receptionist","bar","exit","display"],
     askL = ["receptionist"],
+    itemL = ["pen"],
     exitsL = ["n","s","w"]
 )
 
