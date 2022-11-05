@@ -8,7 +8,7 @@ class Entity:
         self.synonyms = synonyms
         self.synonyms.append(self.name)
         entitySyn[self.name] = self.synonyms  # this puts the synonyms of each entity into the entitySyn dict
-        print(entitySyn)
+
     def look(self):
         print(self.lookT)
         if self.name == "receptionist" and findClassRoom.done is False:  # receptionist will ask if you need help
@@ -101,7 +101,7 @@ getPoints = Objective(
 )
 
 findClassRoom = Objective(
-    completeT="> You found out which classroom you should go to!",
+    completeT="> You found which classroom you should go to!",
     score=1
 )
 
