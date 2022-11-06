@@ -14,14 +14,24 @@ class Entity:
         if self.name == "receptionist" and findClassRoom.done is False:  # receptionist will ask if you need help
             receptionist.hello()
         if self.name == "display" and findClassRoom.done is False:
-            findClassRoom.complete()
+            findClassRoom.complete(currentRoom="lobby")
 
 
 class Thing(Entity):
-    def __init__(self, useL=[], *args, **kwargs):
+    def __init__(self, consumeOnUse, useT="", useRoom=["ANY"], *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.useL = useL
+        self.consumeOnUse = consumeOnUse
+        self.useT = useT
+        self.useRoom = useRoom
 
+    def use(self,currentRoom):
+        if currentRoom in self.useRoom or "ANY" in self.useRoom:
+            print(self.useT)
+            if self.consumeOnUse is True:
+                Player.inv.remove(self.name)
+                print(f"> You no longer have the {self.name}.")
+        else:
+            print("You can't use that here.")
 
 class Person(Entity):
     def __init__(self, helloT, askT, *args, **kwargs):
@@ -35,13 +45,15 @@ class Person(Entity):
     def ask(self):
         print(self.askT)
         if self.name == "receptionist" and findClassRoom.done is False:
-            findClassRoom.complete()
+            findClassRoom.complete(currentRoom="lobby") #todo deze moeten naar main? of alles van main naar hier?
 
 
 class Protagonist:
-    def __init__(self, nStairsClimbed=0, score=0, inv={"laptop","bottle"}):
+    def __init__(self, classComplete=False, nStairsClimbed=0, score=0, drinks=0, inv={"laptop","bottle"}):
+        self.classComplete = classComplete
         self.nStairsClimbed = nStairsClimbed
         self.score = score
+        self.drinks = drinks
         self.inv = inv
 
     def changeScore(self, points):
@@ -68,33 +80,37 @@ Player = Protagonist()
 
 
 class Objective:
-    def __init__(self, completeT, score, done=False, repeatable=False, repeatT="", repeatScore=0, confirmT=""):
+    def __init__(self, completeT, score, completeRoom, done=False, repeatable=False, repeatT="", repeatScore=0, confirmT=""):
         self.completeT = completeT
         self.score = score
+        self.completeRoom = completeRoom
         self.done = done
         self.repeatable = repeatable
         self.repeatT = repeatT
         self.repeatScore = repeatScore
         self.confirmT = confirmT
 
-    def complete(self):
-        if self.done is False:  # player hasn't completed the objective yet
-            self.done = True
-            print(self.completeT)
-            Player.changeScore(self.score)
+    def complete(self,currentRoom):
+        if currentRoom in self.completeRoom or "ANY" in self.completeRoom:
+            if self.done is False:  # player hasn't completed the objective yet
+                self.done = True
+                print(self.completeT)
+                Player.changeScore(self.score)
 
-        elif self.done is True and self.repeatable is True:  # player completes a repeatable objective again
-            print(self.repeatT)
-            Player.changeScore(self.repeatScore)
+            elif self.done is True and self.repeatable is True:  # player completes a repeatable objective again
+                print(self.repeatT)
+                Player.changeScore(self.repeatScore)
 
-        elif self.done is True and self.repeatable is False:  # player completes a non-repeatable objective
-            print(self.confirmT)
-
+            elif self.done is True and self.repeatable is False:  # player completes a non-repeatable objective
+                print(self.confirmT)
+        else:
+            print("This is not the right place to use this item...")
 
 # an easter egg
 getPoints = Objective(
     completeT="> You grab some points.",
-    score=3,
+    score=2,
+    completeRoom=["ANY"],
     repeatable=True,
     repeatT="> Hey! Don't get greedy now!",
     repeatScore=-1
@@ -102,12 +118,14 @@ getPoints = Objective(
 
 findClassRoom = Objective(
     completeT="> You found which classroom you should go to!",
-    score=1
+    score=1,
+    completeRoom=["ANY"]
 )
 
 hurtEgo = Objective(
     completeT="> Your ego is hurt. Should have known better.",
     score=-1,
+    completeRoom=["ANY"],
     repeatable=False,
     confirmT="> Your ego still hurts from the last time..."
 )
@@ -115,24 +133,57 @@ hurtEgo = Objective(
 getPen = Objective(
     completeT='"You can keep that if you want.", says the receptionist.\n'
               '> You have a pen!',
-    score=1
+    score=1,
+    completeRoom=["ANY"]
 )
 
 getBeer = Objective(
     completeT="Without a word, the barkeep gives you one of the heavy beers on display.\n"
               "> You have a beer! Remember to drink responsibly.",
-    score=1
+    score=1,
+    completeRoom=["ANY"]
 )
 
 getCoffee = Objective(
     completeT='"The barkeep fills up your Thermos bottle with fresh, hot coffee."\n'
-              '> You have coffee!',
-    score=1
+              '> Your bottle was upgraded into coffee!',
+    score=1,
+    completeRoom=["ANY"]
+)
+
+drinkCoffee = Objective(
+    completeT="The coffee peps you up.",
+    score=1,
+    completeRoom=["ANY"],
+    repeatable=False,
+    confirmT="You've already hit diminishing returns on the coffee.\n"
+             "Still tasty, but you no longer feel the cafeine hit."
+)
+
+drinkBeer = Objective(
+    completeT="The beer reduces your ability to focus on the lessons.\n"
+              "> You chose a really bad time to consume alcohol...",
+    score=-3,
+    completeRoom=["ANY"],
+    repeatable=False,
+    confirmT=""
+)
+
+drinkBeerAfter = Objective(
+    completeT="In celebration of finishing the classes, you crack open the beer.\n"
+              "After you finish your drink, you feel slightly embarrassed for impulsively\n"
+              " consuming alcohol within the Syntra building."
+              "> You chose a somewhat unfortunate time for consuming alcohol...",
+    score=-3,
+    completeRoom=["ANY"],
+    repeatable=False,
+    confirmT=""
 )
 
 manyStairsClimbed = Objective(
     completeT="> You getting tired from walking up all these the stairs...",
     score=-1,
+    completeRoom=["ANY"],
     repeatable=True,
     repeatT=f"> You've climbed {Player.nStairsClimbed} stairs today... Your programmer's muscles ache.",
     # TODO: Ask Kian: Player.nStairsClimbed is always the initial value of 0, how to update?
@@ -158,15 +209,18 @@ barista = Person(
 
 pen = Thing(name="pen",
             lookT="The Syntra-branded pen you got from the reception desk.",
-            synonyms = [])
+            synonyms = [],
+            consumeOnUse=False)
 
 laptop = Thing(name="laptop",
                lookT="You look at your tiny laptop. It can barely run PyCharm.",
-               synonyms = [])
+               synonyms = [],
+               consumeOnUse=False)
 
 bottle = Thing(name="bottle",
                lookT="Your faithful old Thermos bottle. It's mostly empty, just a splash of cold coffee remains.",
-               synonyms=["thermos","cup"])
+               synonyms=["thermos","cup"],
+               consumeOnUse=False)
 
 display = Thing(name="display",
                 lookT="The display lists all classes that are given this evening.\n"
@@ -175,15 +229,20 @@ display = Thing(name="display",
                       "~~Python for Beginners: Room 102~~\n"
                       "~~Body Language: Room 201~~\n"
                       "~~Vitality Coach: Room 303~~",
-                synonyms=[])
+                synonyms=[],
+                consumeOnUse=False)
 
 coffee = Thing(name="coffee",
                lookT="Your faithful old Thermos bottle, filled with hot coffee from the bar.",
-               synonyms=[])
+               useT="You take a sip of from your Thermos bottle.",
+               synonyms=[],
+               consumeOnUse=False)
 
 beer = Thing(name="beer",
              lookT="A specialty beer. Is this the right time to open it?",
-             synonyms=[])
+             useT="You drink the beer.",
+             synonyms=[],
+             consumeOnUse=True)
 
 bar = Entity(name="bar",
              lookT="You pick up a faint whiff of freshly ground coffee. The bar to your west is opened.",

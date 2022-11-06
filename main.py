@@ -27,6 +27,7 @@ class GameC:
               "[look] to look around the room\n"
               "[talk <person>] to start a conversation\n"
               "[look <object>] to look at an object.\n"
+              "[use <object>] to use and object that's in your backpack.\n"
               "[take <object>] to pick up an object.\n"
               "[i] to show a list of items that are in your backpack."
               "[score] to display your current score\n"
@@ -149,13 +150,15 @@ class GameC:
             if x in currentRoom.itemD:
                 currentRoom.itemD.pop(inp.split()[1].lower()) #remove the item from room
                 Player.inv.add(inp.split()[1].lower()) #put item in inventory
-                if x == "pen":
-                    getPen.complete()
+                if x == "pen":  # todo: @kian: elegantere manier om dit te doen? Er zijn specifieke inputs die een
+                    # todo:             "complete" method triggeren, e.g. "get pen" of "get beer".
+                    getPen.complete(currentRoom.name.lower())
                 elif x == "beer":
-                    getBeer.complete()
+                    getBeer.complete(currentRoom.name.lower())
                 elif x == "coffee":
                     Player.inv.remove("bottle")
-                    getCoffee.complete()
+                    getCoffee.complete(currentRoom.name.lower())
+
                 else:
                     print(f"You put the {x} in your backpack.")
                 return True
@@ -163,21 +166,49 @@ class GameC:
             elif x in currentRoom.lookL:
                 print(f"You can't pick the {inp.split()[1].lower()} up! You're just a programmer,"
                       f" not some strongman jock!")
-                hurtEgo.complete()
+                hurtEgo.complete(currentRoom.name.lower())
                 return True
 
             elif x in Player.inv:
                 print(f"You already have the {inp.split()[1].lower()}!")
                 return True
 
+            # an easter egg objective
+            elif inp.split()[1].lower() == "points":
+                getPoints.complete(currentRoom.name.lower())
+
             else:
                 print(f"I'm not sure how to pick that up...")
 
-        # easter egg objective
-        if inp.split()[1].lower() == "points" and inp.lower() != "use points":
-            getPoints.complete()
-
         return True
+
+    def useInp(self):
+        if inp.split()[0].lower() not in ["use"]:
+            return False
+
+        if len(inp.split()) == 1:
+            print(f"What do you want to {inp.split()[0].lower()}?")
+            return True
+
+        elif len(inp.split()) == 2:
+            x = self.synonymCheck(inp.split()[1].lower())
+            n = 'an' if inp.split()[1].lower()[0] in ["a","e","i","o","u"] else 'a'  # "a pen" versus "an objective"
+            if x in Player.inv:
+                str_to_class(x).use(currentRoom)
+
+                if x == "coffee":
+                    drinkCoffee.complete(currentRoom)
+                elif x == "beer" and Player.classComplete is False:
+                    drinkBeer.complete(currentRoom)
+                elif x == "beer" and Player.classComplete is True:
+                    drinkBeerAfter.complete(currentRoom)
+
+            elif x in entitySyn:
+                print(f"You don't have {n} {inp.split()[1].lower()}.")
+            else:
+                print(f"What's {n} {inp.split()[1].lower()}?")
+            return True
+
 
     def invalidAction(self):
         print("I don't understand what you want to do. Type [help] for a list of basic commands.")
@@ -187,18 +218,21 @@ class GameC:
             print(f"You cannot bear this any longer. You run towards your bicycle and ride off as fast as you can.\n"
                   f"When you look behind you, you see the Syntra building disappear behind the horizon.\n"
                   f"You swear never to return again.")
-        elif 0 >= Player.score <= 10:  # bad ending
+        elif -1 < Player.score < 10:  # bad ending
             print(f"You sigh as walk towards your bicycle. You don't feel like you've learned much today.\n"
                   "On the way home, you contemplate quitting the Python for beginners course.")
-        elif Player.score > 10:  # good ending
+        elif Player.score > 9:  # good ending
             print(f"Satisfied, you walk towards your bicycle.\n"
                   "On the way home, many ideas for your Python project come to mind.\n"
                   "You jot them down on a piece of paper before you go to bed.")
+
         input("\n(press Enter to continue)")
+
         if "beer" in Player.inv:
             print(f"After a long day you're finally home!\n"
                   f"You sit down on your couch and crack open the heavy beer you got from the bar.")
             Player.changeScore(3)
+
             input("\n(press Enter to continue)")
 
         print(f"\n ~~You finished the game with a score of {Player.score}! Thanks for playing!")
@@ -237,6 +271,7 @@ while True:
     validAction.append(Game.lookInp())
     validAction.append(Game.talkInp())
     validAction.append(Game.takeInp())
+    validAction.append(Game.useInp())
     validAction.append(Game.optionsInp())
     if True not in validAction:
         Game.invalidAction()

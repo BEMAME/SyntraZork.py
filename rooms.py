@@ -60,7 +60,7 @@ class Stairs(Room):
 Lobby=Room(
     name = "Lobby",
     shortT = "You are in the lobby.",
-    longT = "To your right is the reception desk.\n"
+    longT = "Someone is manning the reception desk.\n"
            "A large display is hanging up high.\n"
            "To the north is an ascending staircase to the first floor.\n"
            "To the south is the exit of the building.\n"
@@ -125,7 +125,8 @@ Bar = Room(
     name="Bar",
     shortT="You are in a mostly empty bar.",
     longT="This is quite a spatious area. Its size accentuates its emptiness.\n"
-          "A staff member is washing up behind the counter.",
+          "A staff member is washing up behind the counter.\n"
+          "To your east is the lobby.",
     lookL=["barista"],
     askL=["barista"],
     exitsL=["e"],
