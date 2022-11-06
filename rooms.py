@@ -1,16 +1,8 @@
 import sys
 from entities_objectives import *
 
-
-coor = [0,0,0] #coordinates x,y,z
-roomCoorD = {(0,0,0):"Lobby", #a dictionary with all the rooms in the game
-             (0,1,0):"Stairs0", #this is used to determine which room the player is in based on the
-             (0,1,1):"Stairs1", #coordinates
-             (0,1,2):"Stairs2",
-             (0,1,3):"Stairs3",
-             (0,-1,0):"Outside",
-             (-1,0,0):"Bar",
-             (1,1,1):"Toilets"}
+coor = [0,0,0]  # coordinates x,y,z
+roomCoorD = {}  # a dictionary with all the rooms and their coordinates, populated by room(__init__)
 
 def list2tuple(x):
     return tuple(x)
@@ -26,8 +18,9 @@ def roomFromCoor(coor):
     return currentRoom
 
 class Room:
-    def __init__(self,name,shortT,longT,lookL,exitsL,useL=[],askL=[],itemD={}):
+    def __init__(self,name,coor,shortT,longT,lookL,exitsL,useL=[],askL=[],itemD={}):
         self.name = name
+        self.coor = coor
         self.shortT = shortT
         self.longT = longT
         self.lookL = lookL
@@ -35,6 +28,7 @@ class Room:
         self.askL = askL
         self.itemD = itemD
         self.exitsL = exitsL
+        roomCoorD[self.coor] = self.name
 
     def checkIfPresent(self,ele,rList):
         return True if ele in rList else False
@@ -62,6 +56,7 @@ class Stairs(Room):
 
 Lobby = Room(
     name = "Lobby",
+    coor=(0,0,0),
     shortT = "You are in the lobby.",
     longT = "Someone is manning the reception desk.\n"
            "A large display is hanging up high.\n"
@@ -75,11 +70,12 @@ Lobby = Room(
 )
 
 Toilets = Room(
-    name = "toilets",
+    name = "Toilets",
+    coor=(1,1,1),
     shortT= "You enter the lavatory.",
     longT="You can [use] the toilets here."
           "To your west is the stairwell. It's the only exit.",
-    lookL=[],
+    lookL=["toilet"],
     exitsL = ["w"],
     useL=["toilet"]
 )
@@ -87,6 +83,7 @@ Toilets = Room(
 
 Stairs0 = Stairs(
     name = "Stairs0",
+    coor=(0,1,0),
     shortT = "You are in the stairwell on the ground floor.",
     longT = "To your south is the Lobby.\n"
             "The classrooms are upstairs.",
@@ -96,6 +93,7 @@ Stairs0 = Stairs(
 
 Stairs1=Stairs(
     name = "Stairs1",
+    coor=(0,1,1),
     shortT = "You are near the stairs on the first floor.",
     longT = "The hallway to your east leads to the toilets.\n"
             "The hallway to your west has multiple classrooms.\n"
@@ -107,6 +105,7 @@ Stairs1=Stairs(
 
 Stairs2=Stairs(
     name = "Stairs2",
+    coor=(0,1,2),
     shortT = "You are near the stairs on the second floor.",
     longT = "The hallway to your west has multiple classrooms.\n"
             "There are more classrooms upstairs.\n"
@@ -117,6 +116,7 @@ Stairs2=Stairs(
 
 Stairs3=Stairs(
     name = "Stairs3",
+    coor=(0,1,3),
     shortT = "You are near the stairs on the third floor.",
     longT = "This is the top floor.\n"
             "The hallway to your west has multiple classrooms.\n"
@@ -127,6 +127,7 @@ Stairs3=Stairs(
 
 Outside = Room(
     name="Outside",
+    coor=(0,-1,0),
     shortT="You exit the building.",
     longT="You breathe in the fresh air.\n"
           "To your north is the Syntra building.\n"
@@ -137,6 +138,7 @@ Outside = Room(
 
 Bar = Room(
     name="Bar",
+    coor=(-1,0,0),
     shortT="You are in a mostly empty bar.",
     longT="This is quite a spatious area. Its size accentuates its emptiness.\n"
           "A staff member is washing up behind the counter.\n"

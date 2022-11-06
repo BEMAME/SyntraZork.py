@@ -2,11 +2,14 @@ entitySyn = {}  # dict with synonyms for all entities, is populated by entity in
 
 
 class Entity:
-    def __init__(self, name, lookT, synonyms):
+    def __init__(self, name, lookT, synonyms, consumeOnUse=False, useRoom=["ANY"], useT=""):
         self.name = name
         self.lookT = lookT
         self.synonyms = synonyms
         self.synonyms.append(self.name)
+        self.consumeOnUse = False
+        self.useRoom = useRoom
+        self.useT = useT
         entitySyn[self.name] = self.synonyms  # this puts the synonyms of each entity into the entitySyn dict
 
     def look(self):
@@ -16,17 +19,9 @@ class Entity:
         if self.name == "display" and findClassRoom.done is False:
             findClassRoom.complete()
 
-
-class Thing(Entity):
-    def __init__(self, consumeOnUse, useT="", useRoom=["ANY"], *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.consumeOnUse = consumeOnUse
-        self.useT = useT
-        self.useRoom = useRoom
-
     def use(self):
         if Player.currentRoom in self.useRoom or "ANY" in self.useRoom:
-            print(self.useT)
+            print(self.useT) if self.useT != "" else None
             if self.consumeOnUse is True:
                 Player.inv.remove(self.name)
                 print(f"> You no longer have the {self.name}.")
@@ -43,13 +38,18 @@ class Thing(Entity):
                 else:
                     drinkBeer.complete()
                 Player.bladderCheck()
-            elif self.name == "toilets":
-                Player.bladderCheck()
-
+            elif self.name == "toilet":
+                if Player.drinks > 0:
+                    bladderRelief.complete()
+                    Player.drinks = 0
+                else:
+                    print("You don't need to use the toilet.")
         else:
             print("You can't use that here.")
 
-
+class Thing(Entity):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def take(self):
         Player.currentRoom.itemD.pop(self.name)  # remove the item from room
@@ -84,7 +84,8 @@ class Person(Entity):
 
 
 class Protagonist:
-    def __init__(self, currentRoom, classComplete=False, nStairsClimbed=0, score=0, drinks=0, inv={"laptop","bottle"}):
+    def __init__(self, currentRoom="lobby", classComplete=False, nStairsClimbed=0,
+                 score=0, drinks=0, inv={"laptop","bottle"}):
         self.currentRoom = currentRoom
         self.classComplete = classComplete
         self.nStairsClimbed = nStairsClimbed
@@ -112,23 +113,20 @@ class Protagonist:
         print(f"Your score is {self.score}.")
 
     def bladderCheck(self):
-        print(Player.currentRoom)
         if Player.drinks > 3:
             bladderFull.complete()
-        if Player.drinks > 5:
+
+        elif Player.drinks > 5:
             bladderDisaster.complete()
             Player.drinks = 0
-        if Player.drinks > 0 and Player.currentRoom == "Toilets":
-            bladderRelief.complete()
-            print("test")
-            Player.drinks = 0
 
 
-Player = Protagonist(currentRoom="lobby")
+Player = Protagonist()
 
 
 class Objective:
-    def __init__(self, completeT, score, completeRoom, done=False, repeatable=False, repeatT="", repeatScore=0, confirmT=""):
+    def __init__(self, completeT, score, completeRoom,done=False,
+                 repeatable=False, repeatT="", repeatScore=0, confirmT=""):
         self.completeT = completeT
         self.score = score
         self.completeRoom = completeRoom
@@ -139,16 +137,14 @@ class Objective:
         self.confirmT = confirmT
 
     def complete(self):
-        if Player.currentRoom in self.completeRoom or "ANY" in self.completeRoom:
+        if Player.currentRoom.name in self.completeRoom or "ANY" in self.completeRoom:
             if self.done is False:  # player hasn't completed the objective yet
                 self.done = True
                 print(self.completeT)
                 Player.changeScore(self.score)
-
             elif self.done is True and self.repeatable is True:  # player completes a repeatable objective again
                 print(self.repeatT)
                 Player.changeScore(self.repeatScore)
-
             elif self.done is True and self.repeatable is False:  # player completes a non-repeatable objective
                 print(self.confirmT)
         else:
@@ -260,9 +256,9 @@ bladderDisaster = Objective(
 )
 
 bladderRelief = Objective(
-    completeT="You relieve yourself.",
+    completeT="You feel relieved.",
     score=1,
-    completeRoom=["toilets"],
+    completeRoom=["Toilets"],
     repeatable=True,
     repeatScore=0,
     repeatT="You have another quick tinkle. Better safe than sorry!"
@@ -330,7 +326,8 @@ exit = Entity(name="exit",
               lookT="The entrance to the building. You came in this way.",
               synonyms=[])
 
-toilet = Thing(name="toilet",
-               lookT="Clean and well maintained.\n",
+toilet = Entity(name="toilet",
+               lookT="Sparkling clean! Very inviting.",
                synonyms=["toilets","lavatory","wc"],
-               consumeOnUse="False")
+               useT=""
+               )

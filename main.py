@@ -152,7 +152,7 @@ class GameC:
 
             elif x in Player.currentRoom.lookL:
                 print(f"You can't pick the {inp.split()[1].lower()} up! You're just a programmer,"
-                      f" not some strongman jock!")
+                      f" not some sort of strongman jock!")
                 hurtEgo.complete()
                 return True
 
