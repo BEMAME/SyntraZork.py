@@ -36,12 +36,12 @@ class GameC:
     def walkInp(self):  # Returns new room if valid direction input,
                         # returns true/false is for checking if valid input given
         if len(inp.split()) > 1 and inp.lower() != "go home":
-            return False, currentRoom
+            return False, Player.currentRoom
 
         if inp.lower() not in ["n", "e", "s", "w", "u", "d", "go home"]:
-            return False, currentRoom
+            return False, Player.currentRoom
 
-        if currentRoom.checkIfPresent(inp,currentRoom.exitsL):
+        if Player.currentRoom.checkIfPresent(inp,Player.currentRoom.exitsL):
             if inp.lower() == "n":
                 coor[1] = coor[1]+1
             if inp.lower() == "e":
@@ -52,15 +52,15 @@ class GameC:
                 coor[0] = coor[0]-1
             if inp.lower() == "u":
                 coor[2] = coor[2]+1
-                currentRoom.climbStairsExhaustion()
+                Player.currentRoom.climbStairsExhaustion()
             if inp.lower() == "d":
                 coor[2] = coor[2]-1
             if inp.lower() == "go home":  # this can only be selected from the "Outside" room
                 Game.endGame()
-            return True, currentRoom.enter()
+            return True, Player.currentRoom.enter()
         else:
             print(f"You cannot go that way.")
-            return True,currentRoom
+            return True,Player.currentRoom
 
     def checkInputLen(self):  # is called when player enters 3 words or more - this is not allowed
         if len(inp.split()) > 2:
@@ -81,7 +81,7 @@ class GameC:
             return True
 
         if inp.lower() in ["coor", "where", "location"]:
-            print(f"{currentRoom.shortT} Your coordinates are {coor}.")
+            print(f"{Player.currentRoom.shortT} Your coordinates are {coor}.")
             return True
 
         if inp.lower() in ["score", "points"]:
@@ -99,22 +99,21 @@ class GameC:
 
         # player typed "look" or "look room" ==> give description of room
         if len(inp.split()) == 1 or inp.lower() == "look room":
-            currentRoom.look()
+            Player.currentRoom.look()
             return True
 
         # player typed "look <something>"
         elif len(inp.split()) == 2:
             x = self.synonymCheck(inp.split()[1].lower())
-            if x in Player.inv:
+            if x in Player.inv:           # items that have been picked up
                 print("You have a look in your backpack.")
                 str_to_class(x).look()
-            elif x in currentRoom.lookL:
+            elif x in Player.currentRoom.lookL:  # entities that cannot be taken (e.g. lobby display)
                 str_to_class(x).look()
-            elif x in currentRoom.itemD:
-                print(currentRoom.itemD[x])
+            elif x in Player.currentRoom.itemD:  # things that are laying in the room but haven't been picked up
+                print(Player.currentRoom.itemD[x])
             else:
                 print("I don't understand what you want to look at. Are you sure it is visible?")
-                print(entitySyn,"x=",x)
 
         return True
 
@@ -127,7 +126,7 @@ class GameC:
 
         elif len(inp.split()) == 2:
             x = self.synonymCheck(inp.split()[1].lower())
-            if x in currentRoom.askL:
+            if x in Player.currentRoom.askL:
                 str_to_class(x).ask()
             elif x in Player.inv:
                 print(f"{x.capitalize()} isn't feeling very talkative.")
@@ -147,26 +146,14 @@ class GameC:
         elif len(inp.split()) == 2:
             x = self.synonymCheck(inp.split()[1].lower())
 
-            if x in currentRoom.itemD:
-                currentRoom.itemD.pop(inp.split()[1].lower()) #remove the item from room
-                Player.inv.add(inp.split()[1].lower()) #put item in inventory
-                if x == "pen":  # todo: @kian: elegantere manier om dit te doen? Er zijn specifieke inputs die een
-                    # todo:             "complete" method triggeren, e.g. "get pen" of "get beer".
-                    getPen.complete(currentRoom.name.lower())
-                elif x == "beer":
-                    getBeer.complete(currentRoom.name.lower())
-                elif x == "coffee":
-                    Player.inv.remove("bottle")
-                    getCoffee.complete(currentRoom.name.lower())
-
-                else:
-                    print(f"You put the {x} in your backpack.")
+            if x in Player.currentRoom.itemD:
+                str_to_class(x).take()
                 return True
 
-            elif x in currentRoom.lookL:
+            elif x in Player.currentRoom.lookL:
                 print(f"You can't pick the {inp.split()[1].lower()} up! You're just a programmer,"
                       f" not some strongman jock!")
-                hurtEgo.complete(currentRoom.name.lower())
+                hurtEgo.complete()
                 return True
 
             elif x in Player.inv:
@@ -175,7 +162,7 @@ class GameC:
 
             # an easter egg objective
             elif inp.split()[1].lower() == "points":
-                getPoints.complete(currentRoom.name.lower())
+                getPoints.complete()
 
             else:
                 print(f"I'm not sure how to pick that up...")
@@ -193,22 +180,17 @@ class GameC:
         elif len(inp.split()) == 2:
             x = self.synonymCheck(inp.split()[1].lower())
             n = 'an' if inp.split()[1].lower()[0] in ["a","e","i","o","u"] else 'a'  # "a pen" versus "an objective"
-            if x in Player.inv:
-                str_to_class(x).use(currentRoom)
 
-                if x == "coffee":
-                    drinkCoffee.complete(currentRoom)
-                elif x == "beer" and Player.classComplete is False:
-                    drinkBeer.complete(currentRoom)
-                elif x == "beer" and Player.classComplete is True:
-                    drinkBeerAfter.complete(currentRoom)
+            if x in Player.inv or x in Player.currentRoom.useL:
+                str_to_class(x).use()
 
             elif x in entitySyn:
                 print(f"You don't have {n} {inp.split()[1].lower()}.")
+
             else:
                 print(f"What's {n} {inp.split()[1].lower()}?")
-            return True
 
+            return True
 
     def invalidAction(self):
         print("I don't understand what you want to do. Type [help] for a list of basic commands.")
@@ -247,7 +229,7 @@ while True:
     # setting up the very first room at the start of the game...
     if Game.gameStart is True:
         print("------------------------------------------------------------------------------------------------------")
-        currentRoom = roomFromCoor(coor)
+        Player.currentRoom = roomFromCoor(coor)
         print("A few weeks ago, you registered for the Syntra 'Python for Beginners' class.\n"
               "Full of excitement you enter the Syntra lobby. Classes start in 5 minutes.\n"
               "You should [look] around to find out where to go.")
@@ -265,7 +247,7 @@ while True:
 
     #checks what input was given and performs the action
     validAction = []
-    walkValidInp, currentRoom = Game.walkInp()
+    walkValidInp, Player.currentRoom = Game.walkInp()
     validAction.append(walkValidInp)
     validAction.append(Game.checkInputLen())
     validAction.append(Game.lookInp())

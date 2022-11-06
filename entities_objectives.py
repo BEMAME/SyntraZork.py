@@ -14,7 +14,7 @@ class Entity:
         if self.name == "receptionist" and findClassRoom.done is False:  # receptionist will ask if you need help
             receptionist.hello()
         if self.name == "display" and findClassRoom.done is False:
-            findClassRoom.complete(currentRoom="lobby")
+            findClassRoom.complete()
 
 
 class Thing(Entity):
@@ -24,14 +24,46 @@ class Thing(Entity):
         self.useT = useT
         self.useRoom = useRoom
 
-    def use(self,currentRoom):
-        if currentRoom in self.useRoom or "ANY" in self.useRoom:
+    def use(self):
+        if Player.currentRoom in self.useRoom or "ANY" in self.useRoom:
             print(self.useT)
             if self.consumeOnUse is True:
                 Player.inv.remove(self.name)
                 print(f"> You no longer have the {self.name}.")
+
+            # specials
+            if self.name == "coffee":
+                drinkCoffee.complete()
+                Player.drinks += 1
+                Player.bladderCheck()
+            elif self.name == "beer":
+                Player.drinks += 3
+                if Player.classComplete is True:
+                    drinkBeerAfter.complete()
+                else:
+                    drinkBeer.complete()
+                Player.bladderCheck()
+            elif self.name == "toilets":
+                Player.bladderCheck()
+
         else:
             print("You can't use that here.")
+
+
+
+    def take(self):
+        Player.currentRoom.itemD.pop(self.name)  # remove the item from room
+        Player.inv.add(self.name)  # put item in inventory
+        if self.name == "pen":  # todo: @kian: elegantere manier om dit te doen? Er zijn specifieke inputs die een
+            # todo:             "complete" method triggeren, e.g. "get pen" of "get beer".
+            getPen.complete()
+        elif self.name == "beer":
+            getBeer.complete()
+        elif self.name == "coffee":
+            Player.inv.remove("bottle")
+            getCoffee.complete()
+        else:
+            print(f"You put the {self.name} in your backpack.")
 
 class Person(Entity):
     def __init__(self, helloT, askT, *args, **kwargs):
@@ -44,12 +76,16 @@ class Person(Entity):
 
     def ask(self):
         print(self.askT)
-        if self.name == "receptionist" and findClassRoom.done is False:
-            findClassRoom.complete(currentRoom="lobby") #todo deze moeten naar main? of alles van main naar hier?
+        if self.name in ["receptionist","teacher","barista"] and bladderFull.done is True:
+            print(f"You ask the {self.name} where the toilets are."
+                  '"First floor, east."')
+        elif self.name == "receptionist" and findClassRoom.done is False:
+            findClassRoom.complete()
 
 
 class Protagonist:
-    def __init__(self, classComplete=False, nStairsClimbed=0, score=0, drinks=0, inv={"laptop","bottle"}):
+    def __init__(self, currentRoom, classComplete=False, nStairsClimbed=0, score=0, drinks=0, inv={"laptop","bottle"}):
+        self.currentRoom = currentRoom
         self.classComplete = classComplete
         self.nStairsClimbed = nStairsClimbed
         self.score = score
@@ -75,8 +111,20 @@ class Protagonist:
     def prtScore(self):
         print(f"Your score is {self.score}.")
 
+    def bladderCheck(self):
+        print(Player.currentRoom)
+        if Player.drinks > 3:
+            bladderFull.complete()
+        if Player.drinks > 5:
+            bladderDisaster.complete()
+            Player.drinks = 0
+        if Player.drinks > 0 and Player.currentRoom == "Toilets":
+            bladderRelief.complete()
+            print("test")
+            Player.drinks = 0
 
-Player = Protagonist()
+
+Player = Protagonist(currentRoom="lobby")
 
 
 class Objective:
@@ -90,8 +138,8 @@ class Objective:
         self.repeatScore = repeatScore
         self.confirmT = confirmT
 
-    def complete(self,currentRoom):
-        if currentRoom in self.completeRoom or "ANY" in self.completeRoom:
+    def complete(self):
+        if Player.currentRoom in self.completeRoom or "ANY" in self.completeRoom:
             if self.done is False:  # player hasn't completed the objective yet
                 self.done = True
                 print(self.completeT)
@@ -145,7 +193,7 @@ getBeer = Objective(
 )
 
 getCoffee = Objective(
-    completeT='"The barkeep fills up your Thermos bottle with fresh, hot coffee."\n'
+    completeT="The barkeep fills up your Thermos bottle with fresh, hot coffee.\n"
               '> Your bottle was upgraded into coffee!',
     score=1,
     completeRoom=["ANY"]
@@ -181,13 +229,43 @@ drinkBeerAfter = Objective(
 )
 
 manyStairsClimbed = Objective(
-    completeT="> You getting tired from walking up all these the stairs...",
+    completeT="You getting tired from walking up all these the stairs...",
     score=-1,
     completeRoom=["ANY"],
     repeatable=True,
-    repeatT=f"> You've climbed {Player.nStairsClimbed} stairs today... Your programmer's muscles ache.",
+    repeatT=f"You've climbed {Player.nStairsClimbed} stairs today... Your programmer's muscles ache.",
     # TODO: Ask Kian: Player.nStairsClimbed is always the initial value of 0, how to update?
     repeatScore=-1
+)
+
+bladderFull = Objective(
+    completeT="> All these drinks have filled up your bladder...",
+    score=0,
+    completeRoom=["ANY"],
+    repeatable=True,
+    repeatScore=-1,
+    repeatT="Although your bladder is already completely full, you decide to fill it up further.\n"
+            "> This may end in disaster..."
+)
+
+bladderDisaster = Objective(
+    completeT="You're too late. Emotions of warmth, relief and embarrassment wash over you.\n"
+              "> You've had a little accident.",
+    score=-10,
+    completeRoom=["ANY"],
+    repeatable=True,
+    repeatScore=-5,
+    repeatT="Once more you piss yourself. This time you're not quite as embarrassed.\n"
+            "> You've had another little accident."
+)
+
+bladderRelief = Objective(
+    completeT="You relieve yourself.",
+    score=1,
+    completeRoom=["toilets"],
+    repeatable=True,
+    repeatScore=0,
+    repeatT="You have another quick tinkle. Better safe than sorry!"
 )
 
 receptionist = Person(
@@ -251,3 +329,8 @@ bar = Entity(name="bar",
 exit = Entity(name="exit",
               lookT="The entrance to the building. You came in this way.",
               synonyms=[])
+
+toilet = Thing(name="toilet",
+               lookT="Clean and well maintained.\n",
+               synonyms=["toilets","lavatory","wc"],
+               consumeOnUse="False")

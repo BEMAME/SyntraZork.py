@@ -9,7 +9,8 @@ roomCoorD = {(0,0,0):"Lobby", #a dictionary with all the rooms in the game
              (0,1,2):"Stairs2",
              (0,1,3):"Stairs3",
              (0,-1,0):"Outside",
-             (-1,0,0):"Bar"}
+             (-1,0,0):"Bar",
+             (1,1,1):"Toilets"}
 
 def list2tuple(x):
     return tuple(x)
@@ -25,11 +26,12 @@ def roomFromCoor(coor):
     return currentRoom
 
 class Room:
-    def __init__(self,name,shortT,longT,lookL,exitsL,askL=[],itemD={}):
+    def __init__(self,name,shortT,longT,lookL,exitsL,useL=[],askL=[],itemD={}):
         self.name = name
         self.shortT = shortT
         self.longT = longT
         self.lookL = lookL
+        self.useL = useL
         self.askL = askL
         self.itemD = itemD
         self.exitsL = exitsL
@@ -57,7 +59,8 @@ class Stairs(Room):
         if Player.nStairsClimbed > 2:
             manyStairsClimbed.complete()
 
-Lobby=Room(
+
+Lobby = Room(
     name = "Lobby",
     shortT = "You are in the lobby.",
     longT = "Someone is manning the reception desk.\n"
@@ -71,7 +74,18 @@ Lobby=Room(
     exitsL = ["n","s","w"]
 )
 
-Stairs0=Stairs(
+Toilets = Room(
+    name = "toilets",
+    shortT= "You enter the lavatory.",
+    longT="You can [use] the toilets here."
+          "To your west is the stairwell. It's the only exit.",
+    lookL=[],
+    exitsL = ["w"],
+    useL=["toilet"]
+)
+
+
+Stairs0 = Stairs(
     name = "Stairs0",
     shortT = "You are in the stairwell on the ground floor.",
     longT = "To your south is the Lobby.\n"
