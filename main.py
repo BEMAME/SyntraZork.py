@@ -2,6 +2,8 @@ print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
       "\n~~~~  Welcome to SyntraZork! Input 'help' for options  ~~~~\n"
       "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 
+print("plz")
+
 from rooms import *
 
 class GameC:
